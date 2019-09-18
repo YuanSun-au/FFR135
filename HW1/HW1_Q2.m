@@ -1,5 +1,7 @@
-clear all; clc;
-%% The stored patterns
+%% HW1 Question 2 - FFR135
+% Author: Jonas Hejderup
+clear all;close all; clc;
+%% The stored and distorted patterns
 x1=[[ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],[ -1, -1, -1, 1, 1, 1, 1, -1, -1, -1],[ -1, -1, 1, 1, 1, 1, 1, 1, -1, -1],...
     [ -1, 1, 1, 1, -1, -1, 1, 1, 1, -1],[ -1, 1, 1, 1, -1, -1, 1, 1, 1, -1],[ -1, 1, 1, 1, -1, -1, 1, 1, 1, -1],...
     [ -1, 1, 1, 1, -1, -1, 1, 1, 1, -1],[ -1, 1, 1, 1, -1, -1, 1, 1, 1, -1],[ -1, 1, 1, 1, -1, -1, 1, 1, 1, -1],...
@@ -61,7 +63,10 @@ feed_pattern = [pattern_q1',pattern_q2',pattern_q3'];
 
 %% Parameters and weight matrix
 N = length(x1);
+output_pattern = zeros(size(feed_pattern));
+output_digit = zeros(1,size(feed_pattern,2));
 
+% Defining the weight matrix W
 W = zeros(N);
 for k = 1:size(stored_pattern,2)
     W = W + stored_pattern(:,k)*stored_pattern(:,k)';
@@ -69,14 +74,15 @@ end
 W = W.*(1/N);
 W = W - diag(diag(W));
 
-%% Q1 pattern
-output_pattern = zeros(size(feed_pattern));
-output_digit = zeros(1,size(feed_pattern,2));
-for i = 1:size((feed_pattern),2)
+%% Main loop
+
+for i = 1:size((feed_pattern),2) % Loop through all the distorted pattern
     state = feed_pattern(:,i);
     state_old = zeros(size(state));
+    % while loop to make sure it reaches steady state
     while state ~= state_old
         state_old = state;
+        % Do the async update neurons according to type writer scheme
         for j = 1:length(state)
             z = W(j,:)*state;
             S = sign(z);
@@ -88,11 +94,12 @@ for i = 1:size((feed_pattern),2)
     end
     output_pattern(:,i) = state;
     
+    % Determine the digit, NOTE: Not foolproof, need graph to verify
     for k = 1:size((stored_pattern),2)
         if state == stored_pattern(:,k)
             output_digit(i) = k;
             break
-        elseif state == (-stored_pattern(:,k))
+        elseif state == (-stored_pattern(:,k)) % Checking for the inverse
             output_digit(i) = -k;
             break
         elseif k == size((stored_pattern),2)
@@ -101,11 +108,25 @@ for i = 1:size((feed_pattern),2)
     end
 end
 
+%% Printing and plotting the classified digits to manually check the output
 for i = 1:size(output_pattern,2)
     disp(['The classified digit for Q',num2str(i),' is: ',num2str(output_digit(i))])
     disp(['The steady state pattern for Q',num2str(i),' is:'])
     reshape(output_pattern(:,i),[10,16])'
     
+    figure(i)
+    subplot(1,3,2)
+    image(reshape(feed_pattern(:,i)*-1,[10,16])', 'CdataMapping', 'scaled')
+    colormap gray
+    title('Distorted pattern')
+    
+    subplot(1,3,3)
+    image(reshape(output_pattern(:,i)*-1,[10,16])', 'CdataMapping', 'scaled')
+    colormap gray
+    title('Classified pattern')
+    
+    subplot(1,3,1)
+    image(reshape(stored_pattern(:,abs(output_digit(i)))*-1,[10,16])', 'CdataMapping', 'scaled')
+    colormap gray
+    title('Stored pattern')
 end
-
-
