@@ -1,3 +1,5 @@
+%% HW2 - Q4
+% Author: Jonas Hejderup
 clear all; clc;
 %% Load training and validation data
 train_data = csvread("training_set.csv");
@@ -58,6 +60,7 @@ for i = 1:epochs
     % Break if the error criteria is met
     if C < error_criteria
         disp(['Epoch: ',num2str(i),' Classification error: ',num2str(C)])
+        disp('Criteria is met');
         break
     else
         disp(['Epoch: ',num2str(i),' Classification error: ',num2str(C)])

@@ -8,7 +8,7 @@ trials = 10^5;
 W_diag_zero  = false; % Set false for Q1b
 %% Main loop for calcuating the one-step error
 error = zeros(1,length(p));
-for i = 1:length(p) % Loop through all the p
+parfor i = 1:length(p) % Loop through all the p
     
     for j = 1:trials % Do all the trials
         %Generate all the patterns with +1 or -1
